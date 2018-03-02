@@ -1,19 +1,9 @@
-<div class="comment-avatar">
-    <i class="fa fa-user"></i>
-</div>
-<div class="comment-container">
-    <div class="comment-author">
-        <?= $comment->user->username; ?>
-        <span class="comment-date">on <span
-                class="underline"><?= $comment->created->format("l, d M y"); ?></span> at <span
-                class="underline"><?= $comment->created->format("H:i:s"); ?></span></span>
-    </div>
-    <div class="comment-content">
-        <?= h($comment->content); ?>
-    </div>
-    <?php if ($connected): ?>
-        <div class="comment-btn pull-left">
-            <a href="#" class="reply" data-id="<?= $comment->id ?>"><i class="fa fa-reply"></i> Reply</a>
-        </div>
-    <?php endif; ?>
+<div class="media">
+	<?= $this->Html->image('blank-profile-picture.png',['alt'=>'Placeholder','class'=>'mr-1']) ?>
+  <div class="media-body">
+		<h5 class="mt-0"><?= __('On {0}, {1} wrote:', $comment->created->format("l, d M y H:i:s"), $comment->user->name); ?></h5>
+    <?= h($comment->content); ?>
+	<br><a href="#" class="reply" data-id="<?= $comment->id ?>">Reply</a>
+    <?php if($comment->has('children')) echo $this->element('Kareylo/Comments.display', ['comments' => $comment->children, 'connected' => $connected]); ?>
+  </div>
 </div>
