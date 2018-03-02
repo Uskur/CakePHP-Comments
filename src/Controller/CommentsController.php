@@ -23,8 +23,6 @@ class CommentsController extends AppController
     public function initialize()
     {
         parent::initialize();
-        $this->file = file_exists(APP . 'Template' . DS . 'Element' . DS . 'Flash' . DS . 'Comments' . DS . 'comment.ctp') ? 'Comments/comment' : 'Kareylo/Comments.comment';
-        $this->Flash->set(__("You can't comment this"), ['class' => 'error', 'element' => $this->file]);
     }
 
     /**
