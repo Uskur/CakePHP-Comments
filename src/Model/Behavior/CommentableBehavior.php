@@ -63,7 +63,7 @@ class CommentableBehavior extends Behavior
     {
         return $query->contain([
             'Comments' => function (Query $q) use ($options) {
-                return $q->find('threaded')->contain('Users');
+                return $q->find('threaded')->contain('Users')->order(['Comments.created'=>'ASC']);
             }
         ]);
     }
