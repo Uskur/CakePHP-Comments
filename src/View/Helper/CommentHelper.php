@@ -14,15 +14,8 @@ class CommentHelper extends Helper
 {
     public $helpers = ['Html', 'Form'];
     public $_defaultConfig = [
-        'type' => 'ul',
-        'typeClass' => null,
-        'subType' => null,
-        'subTypeClass' => null,
         'loadJS' => false,
     ];
-    private $_allowedTypes = ['ul', 'ol', 'div'];
-    private $_html;
-    private $_files;
 
     /**
      * Used to check if user is connected.
@@ -38,16 +31,7 @@ class CommentHelper extends Helper
      */
     public function initialize(array $config)
     {
-        // Check which template to use : The one in the APP or in the PLUGIN
-        $this->_files['form'] = file_exists(APP . 'Template' . DS . 'Element' . DS . 'Comments' . DS . 'form.ctp') ? 'Comments/form' : 'Kareylo/Comments.form';
-        $this->_files['content'] = file_exists(APP . 'Template' . DS . 'Element' . DS . 'Comments' . DS . 'comment.ctp') ? 'Comments/comment' : 'Kareylo/Comments.comment';
         $this->_connected = $this->request->session()->read('Auth.User.id') !== null;
-        if (!in_array($this->getConfig('type'), $this->_allowedTypes) && $this->getConfig('type') !== null) {
-            throw new \OutOfBoundsException(__("You can't use {$this->getConfig('type')} ! Please use one of the following : " . implode(', ', $this->_allowedTypes)));
-        }
-        if ($this->getConfig('type' !== null)) {
-            $this->setConfig('subType', $this->getConfig('type') === 'div' ? 'div' : 'li');
-        }
     }
 
     /**
@@ -63,17 +47,8 @@ class CommentHelper extends Helper
         } elseif (is_array($entity)) {
             $comments = $entity;
         }
-        if ($comments) {
-            if ($this->getConfig('typeClass')) {
-                $this->_html .= "<{$this->getConfig('type')} class=\"{$this->getConfig('typeClass')}\">";
-            } else {
-                $this->_html .= "<{$this->getConfig('type')}>";
-            }
-            foreach ($comments as $comment) {
-                $this->_html .= $this->comment($comment, false);
-            }
-            $this->_html .= "</{$this->getConfig('type')}>";
-        }
+               
+        $this->_html .= $this->_View->element('Kareylo/Comments.display', ['comments' => $comments, 'connected' => $this->_connected]);
 
         // Check if user is connected and add JS if needed
         if ($entity instanceof EntityInterface) {
@@ -82,42 +57,6 @@ class CommentHelper extends Helper
         }
 
         return $this->_html;
-    }
-
-    /**
-     * Add the current comment
-     * @param EntityInterface $comment Current Comment and his children
-     * @param bool $childless Must we check children ?
-     * @return string
-     */
-    public function comment($comment, $childless = true)
-    {
-        $html = '';
-
-        if ($childless) {
-            return $this->_childless($comment);
-        }
-
-        if ($this->getConfig('subTypeClass')) {
-            $html .= "<{$this->getConfig('subType')} class=\"{$this->getConfig('subTypeClass')}\">";
-        } else {
-            $html .= "<{$this->getConfig('subType')}>";
-        }
-        $html .= $this->_View->element($this->_files['content'], ['comment' => $comment, 'connected' => $this->_connected]);
-        if ($comment->has('children')) {
-            if ($this->getConfig('typeClass')) {
-                $html .= "<{$this->getConfig('type')} class=\"{$this->getConfig('typeClass')}\">";
-            } else {
-                $html .= "<{$this->getConfig('type')}>";
-            }
-            foreach ($comment->children as $child) {
-                $html .= $this->comment($child, false);
-            }
-            $html .= "</{$this->getConfig('type')}>";
-        }
-        $html .= "</{$this->getConfig('subType')}>";
-
-        return $html;
     }
 
     /**
@@ -156,26 +95,5 @@ class CommentHelper extends Helper
             $this->_View->Html->script('Kareylo/Comments.comments.min.js', ['block' => true]);
         }
     }
-
-    /**
-     * return current comment HTML
-     * @param EntityInterface $comment Current Comment
-     * @return string
-     */
-    private function _childless(EntityInterface $comment)
-    {
-        $html = '';
-        if ($this->getConfig('subType') !== null) {
-            if ($this->getConfig('subTypeClass')) {
-                $html .= "<{$this->getConfig('subType')} class=\"{$this->getConfig('subTypeClass')}\">{$this->_View->element($this->_files['content'], ['comment' => $comment, 'connected' => $this->_connected])}";
-            } else {
-                $html .= "<{$this->getConfig('subType')}>{$this->_View->element($this->_files['content'], ['comment' => $comment, 'connected' => $this->_connected])}";
-            }
-            $html .= "</{$this->getConfig('subType')}>";
-        } else {
-            $html .= $this->_View->element($this->_files['content'], ['comment' => $comment, 'connected' => $this->_connected]);
-        }
-
-        return $html;
-    }
+    
 }
