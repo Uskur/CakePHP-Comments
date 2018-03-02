@@ -12,7 +12,12 @@ class CreateComments extends AbstractMigration
      */
     public function change()
     {
-        $table = $this->table('comments');
+        $table = $this->table('comments', ['id' => false, 'primary_key' => ['id']]);
+        $table->addColumn('id', 'uuid', [
+            'default' => null,
+            'limit' => null,
+            'null' => false,
+        ]);
         $table->addColumn('content', 'text', [
             'default' => null,
             'null' => false,
@@ -22,9 +27,9 @@ class CreateComments extends AbstractMigration
             'limit' => 255,
             'null' => false,
         ]);
-        $table->addColumn('ref_id', 'integer', [
+        $table->addColumn('ref_id', 'uuid', [
             'default' => null,
-            'limit' => 11,
+            'limit' => 36,
             'null' => false,
         ]);
         $table->addColumn('ip', 'string', [
@@ -32,14 +37,14 @@ class CreateComments extends AbstractMigration
             'limit' => 255,
             'null' => false,
         ]);
-        $table->addColumn('parent_id', 'integer', [
+        $table->addColumn('parent_id', 'uuid', [
             'default' => null,
-            'limit' => 11,
+            'limit' => 36,
             'null' => true,
         ]);
-        $table->addColumn('user_id', 'integer', [
+        $table->addColumn('user_id', 'uuid', [
             'default' => null,
-            'limit' => 11,
+            'limit' => 36,
             'null' => true
         ]);
         $table->addColumn('created', 'datetime', [
@@ -50,7 +55,7 @@ class CreateComments extends AbstractMigration
             'default' => null,
             'null' => false,
         ]);
-        $table->addForeignKey('user_id', 'users', 'id');
+        //$table->addForeignKey('user_id', 'users', 'id');
         $table->addIndex('ref_id', [
             'unique' => false
         ]);
