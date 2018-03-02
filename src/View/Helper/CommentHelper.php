@@ -67,19 +67,27 @@ class CommentHelper extends Helper
     public function loadFormAndJS(EntityInterface $entity)
     {
         $this->script();
-
+        
         return $this->form($entity);
     }
 
     /**
      * return the Comment Form
-     * @param EntityInterface $entity ModelEntity
+     * 
+     * @param EntityInterface $entity
+     *            ModelEntity
      * @return string
      */
     public function form(EntityInterface $entity)
     {
         if ($this->_connected) {
-            return "<div class='row {$this->getConfig('class')}'>{$this->_View->element($this->_files['form'], ['comment' => TableRegistry::get('Comments')->newEntity(['ref' => $entity->getSource(), 'ref_id' => $entity->get('id')])])}</div>";
+            $comment = TableRegistry::get('Comments')->newEntity([
+                'ref' => $entity->getSource(),
+                'ref_id' => $entity->get('id')
+            ]);
+            return $this->_View->element('Kareylo/Comments.form', [
+                'comment'=>$comment,
+                'connected' => $this->_connected]);            
         }
 
         return '';
