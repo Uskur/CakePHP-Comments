@@ -46,7 +46,10 @@ class CommentsTable extends Table
             'className' => 'Comments.Comments',
             'foreignKey' => 'parent_id'
         ]);
-        $this->belongsTo('Users');
+        $this->belongsTo('CreatedBy', [
+            'className' => 'Users',
+            'foreignKey' => 'user_id'
+        ]);
     }
 
     /**
