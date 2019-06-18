@@ -31,7 +31,7 @@ class CommentHelper extends Helper
      */
     public function initialize(array $config)
     {
-        $this->_connected = $this->request->session()->read('Auth.User.id') !== null;
+        $this->_connected = $this->getView()->getRequest()->getSession()->read('Auth.User.id') !== null;
     }
 
     /**
@@ -81,7 +81,7 @@ class CommentHelper extends Helper
     public function form(EntityInterface $entity)
     {
         if ($this->_connected) {
-            $comment = TableRegistry::get('Comments')->newEntity([
+            $comment = TableRegistry::getTableLocator()->get('Comments')->newEntity([
                 'ref' => $entity->getSource(),
                 'ref_id' => $entity->get('id')
             ]);
