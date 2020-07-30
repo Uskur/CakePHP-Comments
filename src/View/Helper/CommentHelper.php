@@ -39,7 +39,7 @@ class CommentHelper extends Helper
      * @param EntityInterface|array $entity Contain all comments
      * @return string
      */
-    public function display($entity = [])
+    public function display($entity = [], $private = false)
     {
         $comments = [];
         if ($entity instanceof EntityInterface && $entity->has('comments')) {
@@ -47,12 +47,12 @@ class CommentHelper extends Helper
         } elseif (is_array($entity)) {
             $comments = $entity;
         }
-               
-        $this->_html .= $this->_View->element('Kareylo/Comments.display', ['comments' => $comments, 'connected' => $this->_connected]);
+
+        $this->_html .= $this->_View->element('Kareylo/Comments.display', ['comments' => $comments, 'connected' => $this->_connected, 'private' => $private]);
 
         // Check if user is connected and add JS if needed
         if ($entity instanceof EntityInterface) {
-            $this->_html .= $this->form($entity);
+            $this->_html .= $this->form($entity, $private);
             $this->script();
         }
 
@@ -67,18 +67,18 @@ class CommentHelper extends Helper
     public function loadFormAndJS(EntityInterface $entity)
     {
         $this->script();
-        
+
         return $this->form($entity);
     }
 
     /**
      * return the Comment Form
-     * 
+     *
      * @param EntityInterface $entity
      *            ModelEntity
      * @return string
      */
-    public function form(EntityInterface $entity)
+    public function form(EntityInterface $entity, $private = false)
     {
         if ($this->_connected) {
             $comment = TableRegistry::getTableLocator()->get('Comments')->newEntity([
@@ -87,7 +87,9 @@ class CommentHelper extends Helper
             ]);
             return $this->_View->element('Kareylo/Comments.form', [
                 'comment'=>$comment,
-                'connected' => $this->_connected]);            
+                'connected' => $this->_connected,
+                'private' => $private
+            ]);
         }
 
         return '';
@@ -103,5 +105,5 @@ class CommentHelper extends Helper
             $this->_View->Html->script('Kareylo/Comments.comments.min.js', ['block' => true]);
         }
     }
-    
+
 }

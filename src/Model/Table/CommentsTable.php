@@ -7,6 +7,7 @@ use Cake\ORM\Association\BelongsTo;
 use Cake\ORM\Association\HasMany;
 use Cake\ORM\Behavior\TimestampBehavior;
 use Cake\ORM\Behavior\TreeBehavior;
+use Cake\ORM\Query;
 use Cake\ORM\RulesChecker;
 use Cake\ORM\Table;
 use Cake\Validation\Validator;
@@ -82,5 +83,14 @@ class CommentsTable extends Table
         $rules->add($rules->existsIn(['user_id'], 'Users'));
 
         return $rules;
+    }
+
+    public function findByPrivacy(Query $query, array $options)
+    {
+        if(isset($options['private'])) {
+            return $query->where(['private'=>$options['private']]);
+        }
+
+        return $query->where(['private'=>false]);
     }
 }
