@@ -1,45 +1,51 @@
 <?php
+declare(strict_types=1);
 
 namespace Kareylo\Comments\View\Helper;
 
 use Cake\Datasource\EntityInterface;
 use Cake\ORM\TableRegistry;
 use Cake\View\Helper;
-use Cake\View\Helper\FormHelper;
 
 /**
- * @property FormHelper Form
+ * @property \Cake\View\Helper\FormHelper $Form
  */
 class CommentHelper extends Helper
 {
     public $helpers = ['Html', 'Form'];
-    public $_defaultConfig = [
-        'loadJS' => false,
+    protected $_defaultConfig = [
+        'loadJS' => true,
     ];
+    protected string $_html = '';
 
     /**
      * Used to check if user is connected.
      * If user isn't connected, he can't reply and post a comment
+     *
      * @var bool
      */
     private $_connected = false;
 
     /**
      * Setup the helper.
+     *
      * @param array $config default config
      * @return void
      */
-    public function initialize(array $config)
+    public function initialize(array $config): void
     {
-        $this->_connected = $this->getView()->getRequest()->getSession()->read('Auth.User.id') !== null;
+        $identity = $this->getView()->getRequest()->getAttribute('identity');
+        $this->_connected = $identity !== null;
     }
 
     /**
      * Display all comments of the given entity
-     * @param EntityInterface|array $entity Contain all comments
+     *
+     * @param \Cake\Datasource\EntityInterface|array $entity Contain all comments
+     * @param bool $private Whether to include private comments.
      * @return string
      */
-    public function display($entity = [], $private = false)
+    public function display(EntityInterface|array $entity = [], bool $private = false): string
     {
         $comments = [];
         if ($entity instanceof EntityInterface && $entity->has('comments')) {
@@ -48,7 +54,11 @@ class CommentHelper extends Helper
             $comments = $entity;
         }
 
-        $this->_html .= $this->_View->element('Kareylo/Comments.display', ['comments' => $comments, 'connected' => $this->_connected, 'private' => $private]);
+        $this->_html .= $this->getView()->element('Kareylo/Comments.display', [
+            'comments' => $comments,
+            'connected' => $this->_connected,
+            'private' => $private,
+        ]);
 
         // Check if user is connected and add JS if needed
         if ($entity instanceof EntityInterface) {
@@ -61,10 +71,11 @@ class CommentHelper extends Helper
 
     /**
      * load JS and return CommentForm
-     * @param EntityInterface $entity the model entity
+     *
+     * @param \Cake\Datasource\EntityInterface $entity the model entity
      * @return string
      */
-    public function loadFormAndJS(EntityInterface $entity)
+    public function loadFormAndJS(EntityInterface $entity): string
     {
         $this->script();
 
@@ -74,21 +85,22 @@ class CommentHelper extends Helper
     /**
      * return the Comment Form
      *
-     * @param EntityInterface $entity
-     *            ModelEntity
+     * @param \Cake\Datasource\EntityInterface $entity ModelEntity
+     * @param bool $private Whether to post the comment as private.
      * @return string
      */
-    public function form(EntityInterface $entity, $private = false)
+    public function form(EntityInterface $entity, bool $private = false): string
     {
         if ($this->_connected) {
-            $comment = TableRegistry::getTableLocator()->get('Comments')->newEntity([
-                'ref' => $entity->getSource(),
-                'ref_id' => $entity->get('id')
-            ]);
-            return $this->_View->element('Kareylo/Comments.form', [
-                'comment'=>$comment,
+            $comment = TableRegistry::getTableLocator()->get('Kareylo/Comments.Comments')->newEmptyEntity();
+            $comment->set('ref', $entity->getSource());
+            $comment->set('ref_id', $entity->get('id'));
+
+            return $this->getView()->element('Kareylo/Comments.form', [
+                'comment' => $comment,
                 'connected' => $this->_connected,
-                'private' => $private
+                'private' => $private,
+                'redirectUrl' => $this->getView()->getRequest()->getRequestTarget(),
             ]);
         }
 
@@ -97,13 +109,13 @@ class CommentHelper extends Helper
 
     /**
      * Load JS is required
+     *
      * @return void
      */
-    public function script()
+    public function script(): void
     {
         if ($this->_connected && $this->getConfig('loadJS')) {
-            $this->_View->Html->script('Kareylo/Comments.comments.min.js', ['block' => true]);
+            $this->getView()->Html->script('Kareylo/Comments.comments.min.js', ['block' => true]);
         }
     }
-
 }

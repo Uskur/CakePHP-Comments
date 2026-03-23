@@ -1,4 +1,5 @@
 <?php
+
 use Migrations\AbstractMigration;
 
 class CreateComments extends AbstractMigration
@@ -8,6 +9,7 @@ class CreateComments extends AbstractMigration
      *
      * More information on this method is available here:
      * http://docs.phinx.org/en/latest/migrations.html#the-change-method
+     *
      * @return void
      */
     public function change()
@@ -45,7 +47,7 @@ class CreateComments extends AbstractMigration
         $table->addColumn('user_id', 'uuid', [
             'default' => null,
             'limit' => 36,
-            'null' => true
+            'null' => true,
         ]);
         $table->addColumn('created', 'datetime', [
             'default' => null,
@@ -57,7 +59,7 @@ class CreateComments extends AbstractMigration
         ]);
         //$table->addForeignKey('user_id', 'users', 'id');
         $table->addIndex('ref_id', [
-            'unique' => false
+            'unique' => false,
         ]);
         $table->create();
     }

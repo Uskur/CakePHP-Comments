@@ -1,9 +1,11 @@
 <?php
-use Cake\Routing\RouteBuilder;
-use Cake\Routing\Router;
-use Cake\Routing\Route\DashedRoute;
+declare(strict_types=1);
 
-Router::plugin('Kareylo/Comments', ['path' => '/comments'], function (RouteBuilder $routes) {
-    $routes->connect('/', ['action' => 'index', 'controller' => 'Comments']);
-    $routes->fallbacks(DashedRoute::class);
-});
+use Cake\Routing\Route\DashedRoute;
+use Cake\Routing\RouteBuilder;
+
+return static function (RouteBuilder $routes): void {
+    $routes->plugin('Kareylo/Comments', ['path' => '/comments'], function (RouteBuilder $routes): void {
+        $routes->fallbacks(DashedRoute::class);
+    });
+};

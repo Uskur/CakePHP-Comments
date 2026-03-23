@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace Kareylo\Comments\Model\Entity;
 
 use Cake\ORM\Entity;
@@ -13,13 +15,12 @@ use Cake\ORM\Entity;
  * @property string $ip
  * @property int $parent_id
  * @property int $user_id
- * @property \Cake\I18n\Time $created
- * @property \Cake\I18n\Time $modified
+ * @property \Cake\I18n\FrozenTime $created
+ * @property \Cake\I18n\FrozenTime $modified
  * @property \App\Model\Entity\User $user
  */
 class Comment extends Entity
 {
-
     /**
      * Fields that can be mass assigned using newEntity() or patchEntity().
      *
@@ -31,6 +32,6 @@ class Comment extends Entity
      */
     protected $_accessible = [
         '*' => true,
-        'id' => false
+        'id' => false,
     ];
 }
