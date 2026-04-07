@@ -13,7 +13,7 @@ class CommentableBehavior extends Behavior
      *
      * @var array
      */
-    protected $_defaultConfig = [
+    protected array $_defaultConfig = [
         'modelClass' => null,
         'commentClass' => 'Kareylo/Comments.Comments',
         'foreignKey' => 'ref_id',

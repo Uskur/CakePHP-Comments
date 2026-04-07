@@ -12,8 +12,8 @@ use Cake\View\Helper;
  */
 class CommentHelper extends Helper
 {
-    public $helpers = ['Html', 'Form'];
-    protected $_defaultConfig = [
+    protected array $helpers = ['Html', 'Form'];
+    protected array $_defaultConfig = [
         'loadJS' => true,
     ];
     protected string $_html = '';
@@ -24,7 +24,7 @@ class CommentHelper extends Helper
      *
      * @var bool
      */
-    private $_connected = false;
+    private bool $_connected = false;
 
     /**
      * Setup the helper.
