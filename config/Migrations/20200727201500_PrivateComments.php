@@ -1,8 +1,8 @@
 <?php
 
-use Migrations\AbstractMigration;
+use Migrations\BaseMigration;
 
-class PrivateComments extends AbstractMigration
+class PrivateComments extends BaseMigration
 {
     /**
      * Add the private flag.
