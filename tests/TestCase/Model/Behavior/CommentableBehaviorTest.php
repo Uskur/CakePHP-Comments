@@ -1,11 +1,11 @@
 <?php
+declare(strict_types=1);
 
 namespace Kareylo\Comments\Test\TestCase\Model\Behavior;
 
 use App\Model\Table\PostsTable;
-use App\Model\Table\UsersTable;
-use Cake\ORM\Query;
-use Cake\ORM\TableRegistry;
+use Cake\Datasource\FactoryLocator;
+use Cake\ORM\Query\SelectQuery;
 use Cake\TestSuite\TestCase;
 
 class CommentableBehaviorTest extends TestCase
@@ -13,43 +13,46 @@ class CommentableBehaviorTest extends TestCase
     /**
      * @var PostsTable|null
      */
-    public $Posts = null;
+    public ?PostsTable $Posts = null;
 
     /**
      * @var array
      */
-    public $fixtures = [
-        'plugin.kareylo/comments.comments',
-        'plugin.kareylo/comments.users',
-        'plugin.kareylo/comments.posts',
+    protected array $fixtures = [
+        'plugin.Kareylo/Comments.Comments',
+        'plugin.Kareylo/Comments.Users',
+        'plugin.Kareylo/Comments.Posts',
     ];
 
     /**
      * setUp
+     *
      * @return void
      */
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
-        $this->Posts = TableRegistry::get('Posts');
+        $this->Posts = FactoryLocator::get('Table')->get('Posts');
     }
 
     /**
      * tearDown
+     *
      * @return void
      */
-    public function tearDown()
+    public function tearDown(): void
     {
-        parent::tearDown();
         unset($this->Posts);
-        TableRegistry::clear();
+        FactoryLocator::get('Table')->clear();
+        parent::tearDown();
     }
 
     /**
      * Test the finder with no comments
+     *
      * @return void
      */
-    public function testFindCommentsWithoutComments()
+    public function testFindCommentsWithoutComments(): void
     {
         $this->Posts->addBehavior('Kareylo/Comments.Commentable', []);
         $result = $this->Posts->find()->where(['id' => 1])->find('comments')->first();
@@ -59,9 +62,10 @@ class CommentableBehaviorTest extends TestCase
 
     /**
      * Test the finder when there's no datas
+     *
      * @return void
      */
-    public function testFindCommentsWithEmptyModelData()
+    public function testFindCommentsWithEmptyModelData(): void
     {
         $this->Posts->addBehavior('Kareylo/Comments.Commentable', []);
         $result = $this->Posts->find()->where(['id' => 999])->find('comments')->first();
@@ -70,13 +74,14 @@ class CommentableBehaviorTest extends TestCase
 
     /**
      * Test the finder with data
+     *
      * @return void
      */
-    public function testFindCommentsWithModelData()
+    public function testFindCommentsWithModelData(): void
     {
         $this->Posts->addBehavior('Kareylo/Comments.Commentable', []);
-        $result = $result = $this->Posts->find()->where(['id' => 2])->find('comments')->first();
-        $expected = $this->Posts->get(2, ['contain' => ['Comments' => function (Query $q) {
+        $result = $this->Posts->find()->where(['id' => 2])->find('comments')->first();
+        $expected = $this->Posts->get(2, ['contain' => ['Comments' => function (SelectQuery $q) {
             return $q->find('threaded')->contain('Users');
         }]]);
         $this->assertEquals($expected, $result);

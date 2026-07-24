@@ -1,81 +1,85 @@
 <?php
+declare(strict_types=1);
 
 namespace Kareylo\Comments\Test\TestCase\Controller;
 
-use Cake\Network\Exception\MethodNotAllowedException;
-use Cake\Network\Request;
-use Cake\Network\Session;
+use Cake\Datasource\FactoryLocator;
+use Cake\Http\Exception\MethodNotAllowedException;
+use Cake\Http\ServerRequest;
+use Cake\Http\Session;
 use Cake\ORM\Exception\MissingBehaviorException;
 use Cake\ORM\Table;
-use Cake\ORM\TableRegistry;
 use Cake\TestSuite\TestCase;
 use Kareylo\Comments\Model\Table\CommentsTable;
+use OutOfBoundsException;
 
 class CommentsControllerTest extends TestCase
 {
-
     /**
      * @var CommentsTable
      */
-    public $Controller;
+    public CommentsTable $Controller;
 
     /**
      * @var Session
      */
-    public $session;
+    public Session $session;
 
     /**
      * @var Table
      */
-    public $model;
+    public Table $model;
 
     /**
      * @var array
      */
-    public $fixtures = [
-        'plugin.kareylo/comments.comments',
-        'plugin.kareylo/comments.posts',
-        'plugin.kareylo/comments.articles',
-        'plugin.kareylo/comments.users',
+    protected array $fixtures = [
+        'plugin.Kareylo/Comments.Comments',
+        'plugin.Kareylo/Comments.Posts',
+        'plugin.Kareylo/Comments.Articles',
+        'plugin.Kareylo/Comments.Users',
     ];
     /**
-     * @var Request
+     * @var \Cake\Http\ServerRequest
      */
-    private $request;
+    private ServerRequest $request;
 
     /**
      * setup
+     *
      * @return void
      */
-    public function setup()
+    public function setUp(): void
     {
         parent::setUp();
 
         $this->session = new Session();
 
-        $this->Controller = TableRegistry::get('Comments');
-        $this->request = new Request();
+        $this->Controller = FactoryLocator::get('Table')->get('Kareylo/Comments.Comments');
+        $this->request = new ServerRequest();
     }
 
     /**
      * tearDown
+     *
      * @return void
      */
-    public function tearDown()
+    public function tearDown(): void
     {
-        parent::tearDown();
         $this->session->destroy();
         unset($this->Controller);
-        TableRegistry::clear();
+        FactoryLocator::get('Table')->clear();
+        parent::tearDown();
     }
 
     /**
      * init
+     *
      * @param string $method
      * @param array $options
      * @param bool $removeBehavior
      */
-    private function _init($method = 'POST', $options = [], $removeBehavior = false)
+    private function _init(string|array $method = 'POST', array $options = [], bool $removeBehavior = false): void
     {
         if (is_array($method)) {
             $options = $method;
@@ -83,14 +87,15 @@ class CommentsControllerTest extends TestCase
         }
         $_SERVER['REQUEST_METHOD'] = $method;
         $this->session->write('Auth.User.id', 1);
-        $this->request->data = array_merge([
+        $data = array_merge([
             'content' => 'Lorem Ipsum',
             'ref' => 'Posts',
             'ref_id' => '2',
-            'parent_id' => ''
+            'parent_id' => '',
         ], $options);
-        $this->model = TableRegistry::get($this->request->data['ref']);
-        if ($this->request->data['ref'] !== 'Posts' || $removeBehavior) {
+        $this->request = $this->request->withParsedBody($data);
+        $this->model = FactoryLocator::get('Table')->get($data['ref']);
+        if ($data['ref'] !== 'Posts' || $removeBehavior) {
             $this->model->behaviors()->unload('Commentable');
         } else {
             $this->model->addBehavior('Kareylo/Comments.Commentable');
@@ -99,9 +104,10 @@ class CommentsControllerTest extends TestCase
 
     /**
      * Test to add a comment with bad method
+     *
      * @return void
      */
-    public function testAddCommentWithBadMethod()
+    public function testAddCommentWithBadMethod(): void
     {
         $this->_init('GET');
         $this->expectException(MethodNotAllowedException::class);
@@ -111,9 +117,10 @@ class CommentsControllerTest extends TestCase
 
     /**
      * Correct comment add (correct ref and ref_id)
+     *
      * @return void
      */
-    public function testAddCommentWithCorrectRefIdAndWithoutParentId()
+    public function testAddCommentWithCorrectRefIdAndWithoutParentId(): void
     {
         $this->_init();
         $result = $this->_add();
@@ -122,21 +129,23 @@ class CommentsControllerTest extends TestCase
 
     /**
      * Add comment with incorrect RefId
+     *
      * @return void
      */
-    public function testAddCommentWithIncorrectRefIdAndWithoutParentId()
+    public function testAddCommentWithIncorrectRefIdAndWithoutParentId(): void
     {
         $this->_init(['ref_id' => '999999']);
-        $this->expectException(\OutOfBoundsException::class);
+        $this->expectException(OutOfBoundsException::class);
         $this->expectExceptionMessage('This Model is not Commentable');
         $this->_add();
     }
 
     /**
      * Add comment with parent_id
+     *
      * @return void
      */
-    public function testAddCommentWithCorrectParentId()
+    public function testAddCommentWithCorrectParentId(): void
     {
         $this->_init(['parent_id' => '1']);
         $result = $this->_add();
@@ -145,21 +154,23 @@ class CommentsControllerTest extends TestCase
 
     /**
      * Add Comment with incorrect parent_id
+     *
      * @return void
      */
-    public function testAddCommentWithIncorrectParentId()
+    public function testAddCommentWithIncorrectParentId(): void
     {
         $this->_init(['parent_id' => '999999']);
-        $this->expectException(\OutOfBoundsException::class);
+        $this->expectException(OutOfBoundsException::class);
         $this->expectExceptionMessage("You can't comment this record");
         $this->_add();
     }
 
     /**
      * Add comment while ref not exists
+     *
      * @return void
      */
-    public function testAddCommentWithModelNotExists()
+    public function testAddCommentWithModelNotExists(): void
     {
         $this->_init(['ref' => 'Articles']);
         $this->expectException(MissingBehaviorException::class);
@@ -169,9 +180,10 @@ class CommentsControllerTest extends TestCase
 
     /**
      * add comment with behavior not loaded
+     *
      * @return void
      */
-    public function testAddCommentWithoutBehavior()
+    public function testAddCommentWithoutBehavior(): void
     {
         $this->_init('POST', [], true);
         $this->expectException(MissingBehaviorException::class);
@@ -181,10 +193,11 @@ class CommentsControllerTest extends TestCase
 
     /**
      * Same method as action add in CommentsController but throw exception, not flash messages
+     *
      * @return bool
      * @throws \Exception
      */
-    protected function _add()
+    protected function _add(): bool
     {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $data = array_merge($this->request->getData(), ['ip' => $this->request->clientIp(), 'user_id' => $this->session->read('Auth.User.id')]);
@@ -195,15 +208,15 @@ class CommentsControllerTest extends TestCase
 
             // check if we can comment this content
             if ($this->model->hasBehavior('Commentable') && !$this->model->exists(['id' => $data['ref_id']])) {
-                throw new \OutOfBoundsException('This Model is not Commentable');
+                throw new OutOfBoundsException('This Model is not Commentable');
             }
 
             // Check if parent exists with the correct model
             if ($data['parent_id'] && !$this->Controller->exists(['id' => $data['parent_id'], 'ref' => $data['ref']])) {
-                throw new \OutOfBoundsException("You can't comment this record");
+                throw new OutOfBoundsException("You can't comment this record");
             }
 
-            $comment = $this->model->Comments->newEntity();
+            $comment = $this->model->Comments->newEmptyEntity();
             $comment = $this->model->Comments->patchEntity($comment, $data);
             if ($this->model->Comments->save($comment)) {
                 return true;

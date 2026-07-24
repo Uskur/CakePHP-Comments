@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace Kareylo\Comments\Model\Behavior;
 
 use Cake\ORM\Behavior;
-use Cake\ORM\Query;
+use Cake\ORM\Query\SelectQuery;
 
 class CommentableBehavior extends Behavior
 {
@@ -56,18 +56,18 @@ class CommentableBehavior extends Behavior
     /**
      * Create the finder comments
      *
-     * @param \Cake\ORM\Query $query the current Query
+     * @param \Cake\ORM\Query\SelectQuery $query the current Query
      * @param array $options Options
-     * @return \Cake\ORM\Query
+     * @return \Cake\ORM\Query\SelectQuery
      */
-    public function findComments(Query $query, array $options = []): Query
+    public function findComments(SelectQuery $query, array $options = []): SelectQuery
     {
         return $query->contain([
-            'Comments' => function (Query $q) use ($options) {
+            'Comments' => function (SelectQuery $q) use ($options) {
                 return $q
                     ->find('threaded')
                     ->contain(['CreatedBy.Attachments'])
-                    ->order(['Comments.created' => 'ASC'])
+                    ->orderBy(['Comments.created' => 'ASC'])
                     ->find('byPrivacy', $options);
             },
         ]);

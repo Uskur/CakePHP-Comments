@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace Kareylo\Comments\View\Helper;
 
 use Cake\Datasource\EntityInterface;
-use Cake\ORM\TableRegistry;
+use Cake\Datasource\FactoryLocator;
 use Cake\View\Helper;
 
 /**
@@ -92,7 +92,7 @@ class CommentHelper extends Helper
     public function form(EntityInterface $entity, bool $private = false): string
     {
         if ($this->_connected) {
-            $comment = TableRegistry::getTableLocator()->get('Kareylo/Comments.Comments')->newEmptyEntity();
+            $comment = FactoryLocator::get('Table')->get('Kareylo/Comments.Comments')->newEmptyEntity();
             $comment->set('ref', $entity->getSource());
             $comment->set('ref_id', $entity->get('id'));
 

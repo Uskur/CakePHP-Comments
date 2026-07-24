@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Kareylo\Comments\Controller;
 
 use Cake\Http\Response;
+use UnexpectedValueException;
 
 /**
  * Class CommentsController
@@ -42,8 +43,9 @@ class CommentsController extends AppController
             return $this->redirect($redirectUrl);
         }
 
-        $userId = $this->currentUser('id');
-        if (!$userId) {
+        $identity = $this->request->getAttribute('identity');
+        $userId = $identity?->getIdentifier();
+        if ($userId === null) {
             $this->Flash->set(__("You can't comment this"), ['element' => 'Kareylo/Comments.comment_error']);
 
             return $this->redirect($redirectUrl);
@@ -62,7 +64,7 @@ class CommentsController extends AppController
 
         try {
             $model = $this->fetchTable($ref);
-        } catch (\UnexpectedValueException) {
+        } catch (UnexpectedValueException) {
             $this->Flash->set(__("You can't comment this"), ['element' => 'Kareylo/Comments.comment_error']);
 
             return $this->redirect($redirectUrl);
@@ -81,7 +83,10 @@ class CommentsController extends AppController
             !empty($data['parent_id']) &&
             !$this->Comments->exists(['id' => $data['parent_id'], 'ref' => $data['ref']])
         ) {
-            $this->Flash->set(__("You can't answer to this comment !"), ['element' => 'Kareylo/Comments.comment_error']);
+            $this->Flash->set(
+                __("You can't answer to this comment !"),
+                ['element' => 'Kareylo/Comments.comment_error'],
+            );
 
             return $this->redirect($redirectUrl);
         }
@@ -89,9 +94,15 @@ class CommentsController extends AppController
         $comment = $model->Comments->newEmptyEntity();
         $comment = $model->Comments->patchEntity($comment, $data);
         if ($model->Comments->save($comment)) {
-            $this->Flash->set(__('Your comment has been correctly added !'), ['element' => 'Kareylo/Comments.comment_success']);
+            $this->Flash->set(
+                __('Your comment has been correctly added !'),
+                ['element' => 'Kareylo/Comments.comment_success'],
+            );
         } else {
-            $this->Flash->set(__('An error occured while saving your comment ! '), ['element' => 'Kareylo/Comments.comment_error']);
+            $this->Flash->set(
+                __('An error occured while saving your comment ! '),
+                ['element' => 'Kareylo/Comments.comment_error'],
+            );
         }
 
         return $this->redirect($redirectUrl);

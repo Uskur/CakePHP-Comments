@@ -1,74 +1,81 @@
 <?php
-// @codingStandardsIgnoreFile
-$findRoot = function () {
-    $root = dirname(__DIR__);
-    if (is_dir($root . '/vendor/cakephp/cakephp')) {
-        return $root;
-    }
-    $root = dirname(dirname(__DIR__));
-    if (is_dir($root . '/vendor/cakephp/cakephp')) {
-        return $root;
-    }
-    $root = dirname(dirname(dirname(__DIR__)));
-    if (is_dir($root . '/vendor/cakephp/cakephp')) {
-        return $root;
-    }
-};
+declare(strict_types=1);
+
+use Cake\Cache\Cache;
+use Cake\Core\Configure;
+use Cake\Datasource\ConnectionManager;
+use Cake\Datasource\FactoryLocator;
+use Cake\ORM\Locator\TableLocator;
+
+$pluginRoot = dirname(__DIR__);
+$autoload = $pluginRoot . '/vendor/autoload.php';
+if (!is_file($autoload)) {
+    $autoload = dirname($pluginRoot, 2) . '/autoload.php';
+}
+if (!is_file($autoload)) {
+    throw new RuntimeException('Unable to locate Composer autoload.php');
+}
+
+$loader = require $autoload;
+$loader->addPsr4('Kareylo\\Comments\\Test\\', $pluginRoot . '/tests/');
+
 if (!defined('DS')) {
     define('DS', DIRECTORY_SEPARATOR);
 }
-define('ROOT', $findRoot());
+
+define('ROOT', $pluginRoot);
 define('APP_DIR', 'App');
-define('WEBROOT_DIR', 'webroot');
-define('APP', ROOT . '/tests/App/');
-define('CONFIG', ROOT . '/tests/config/');
-define('WWW_ROOT', ROOT . DS . WEBROOT_DIR . DS);
+define('APP', ROOT . DS . 'tests' . DS . APP_DIR . DS);
+define('CONFIG', ROOT . DS . 'tests' . DS . 'config' . DS);
+define('WWW_ROOT', ROOT . DS . 'webroot' . DS);
 define('TESTS', ROOT . DS . 'tests' . DS);
-define('TMP', ROOT . DS . 'tmp' . DS);
+define('TMP', sys_get_temp_dir() . DS . 'cakephp-comments-tests' . DS);
 define('LOGS', TMP . 'logs' . DS);
 define('CACHE', TMP . 'cache' . DS);
-define('CAKE_CORE_INCLUDE_PATH', ROOT . '/vendor/cakephp/cakephp');
-define('CORE_PATH', CAKE_CORE_INCLUDE_PATH . DS);
-define('CAKE', CORE_PATH . 'src' . DS);
-require ROOT . '/vendor/autoload.php';
-require CORE_PATH . 'config/bootstrap.php';
-Cake\Core\Configure::write('App', ['namespace' => 'Crud\Test\App']);
-Cake\Core\Configure::write('debug', true);
-$TMP = new \Cake\Filesystem\Folder(TMP);
-$TMP->create(TMP . 'cache/models', 0777);
-$TMP->create(TMP . 'cache/persistent', 0777);
-$TMP->create(TMP . 'cache/views', 0777);
-$cache = [
-    'default' => [
-        'engine' => 'File'
+
+foreach ([TMP, LOGS, CACHE, CACHE . 'models' . DS, CACHE . 'persistent' . DS, CACHE . 'views' . DS] as $directory) {
+    if (!is_dir($directory) && !mkdir($directory, 0777, true) && !is_dir($directory)) {
+        throw new RuntimeException(sprintf('Unable to create test directory "%s"', $directory));
+    }
+}
+
+require dirname($autoload) . '/cakephp/cakephp/config/bootstrap.php';
+
+Configure::write('App', [
+    'namespace' => 'App',
+    'encoding' => 'UTF-8',
+    'defaultLocale' => 'en_US',
+    'defaultTimezone' => 'UTC',
+    'paths' => [
+        'plugins' => [dirname(ROOT) . DS],
+        'templates' => [ROOT . DS . 'templates' . DS],
+        'locales' => [ROOT . DS . 'resources' . DS . 'locales' . DS],
     ],
-    '_cake_core_' => [
+]);
+Configure::write('debug', true);
+Configure::write('Session', ['defaults' => 'php']);
+
+Cache::setConfig([
+    'default' => [
         'className' => 'File',
-        'prefix' => 'crud_myapp_cake_core_',
-        'path' => CACHE . 'persistent/',
-        'serialize' => true,
-        'duration' => '+10 seconds'
+        'path' => CACHE,
+    ],
+    '_cake_translations_' => [
+        'className' => 'File',
+        'path' => CACHE . 'persistent' . DS,
+        'prefix' => 'cake_translations_',
     ],
     '_cake_model_' => [
         'className' => 'File',
-        'prefix' => 'crud_my_app_cake_model_',
-        'path' => CACHE . 'models/',
-        'serialize' => 'File',
-        'duration' => '+10 seconds'
-    ]
-];
-Cake\Cache\Cache::config($cache);
-Cake\Core\Configure::write('Session', [
-    'defaults' => 'php'
+        'path' => CACHE . 'models' . DS,
+        'prefix' => 'cake_model_',
+    ],
 ]);
-Cake\Core\Plugin::load('Kareylo/Comments', ['path' => ROOT . DS, 'autoload' => true, 'routes' => true]);
-Cake\Routing\DispatcherFactory::add('Routing');
-Cake\Routing\DispatcherFactory::add('ControllerFactory');
-// Ensure default test connection is defined
-if (!getenv('db_dsn')) {
-    putenv('db_dsn=sqlite:///:memory:');
-}
-Cake\Datasource\ConnectionManager::config('test', [
-    'url' => getenv('db_dsn'),
-    'timezone' => 'UTC'
+
+$databaseUrl = getenv('DB_URL') ?: getenv('db_dsn') ?: 'sqlite:///:memory:';
+ConnectionManager::setConfig('test', [
+    'url' => $databaseUrl,
+    'timezone' => 'UTC',
 ]);
+
+FactoryLocator::add('Table', new TableLocator());

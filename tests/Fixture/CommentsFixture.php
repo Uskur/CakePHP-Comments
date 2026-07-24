@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace Kareylo\Comments\Test\Fixture;
 
 use Cake\TestSuite\Fixture\TestFixture;
@@ -11,7 +13,7 @@ class CommentsFixture extends TestFixture
      * @var array
      * @access public
      */
-    public $fields = [
+    public array $fields = [
         'id' => ['type' => 'integer'],
         'content' => ['type' => 'text', 'null' => false],
         'ref' => ['type' => 'text', 'null' => false, 'length' => 255],
@@ -21,7 +23,7 @@ class CommentsFixture extends TestFixture
         'user_id' => ['type' => 'integer', 'null' => false, 'length' => 11],
         'created' => ['type' => 'datetime', 'null' => true, 'default' => null],
         'modified' => ['type' => 'datetime', 'null' => true, 'default' => null],
-        '_constraints' => ['primary' => ['type' => 'primary', 'columns' => ['id']]]
+        '_constraints' => ['primary' => ['type' => 'primary', 'columns' => ['id']]],
     ];
 
     /**
@@ -30,7 +32,7 @@ class CommentsFixture extends TestFixture
      * @var array
      * @access public
      */
-    public $records = [
+    public array $records = [
         [
             'content' => 'Lorem Ipsum',
             'ref' => 'Posts',
@@ -80,6 +82,6 @@ class CommentsFixture extends TestFixture
             'user_id' => 3,
             'created' => '2017-03-22 17:07:00',
             'modified' => '2017-03-22 17:07:00',
-        ]
+        ],
     ];
 }

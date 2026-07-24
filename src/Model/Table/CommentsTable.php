@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace Kareylo\Comments\Model\Table;
 
-use Cake\ORM\Query;
+use Cake\ORM\Query\SelectQuery;
 use Cake\ORM\RulesChecker;
 use Cake\ORM\Table;
 use Cake\Validation\Validator;
@@ -88,11 +88,11 @@ class CommentsTable extends Table
     /**
      * Filter comments by privacy.
      *
-     * @param \Cake\ORM\Query $query Query instance.
+     * @param \Cake\ORM\Query\SelectQuery $query Query instance.
      * @param array $options Finder options.
-     * @return \Cake\ORM\Query
+     * @return \Cake\ORM\Query\SelectQuery
      */
-    public function findByPrivacy(Query $query, array $options): Query
+    public function findByPrivacy(SelectQuery $query, array $options): SelectQuery
     {
         if (isset($options['private'])) {
             return $query->where(['private' => $options['private']]);

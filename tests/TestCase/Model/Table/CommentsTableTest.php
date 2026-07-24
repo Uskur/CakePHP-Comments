@@ -1,8 +1,10 @@
 <?php
+declare(strict_types=1);
+
 namespace Kareylo\Comments\Test\TestCase\Model\Table;
 
 use Cake\Core\Configure;
-use Cake\ORM\TableRegistry;
+use Cake\Datasource\FactoryLocator;
 use Cake\TestSuite\TestCase;
 use Kareylo\Comments\Model\Table\CommentsTable;
 
@@ -21,34 +23,35 @@ class CommentsTableTest extends TestCase
      *
      * @var array
      */
-    public $fixtures = [
-        'plugin.kareylo/comments.users',
-        'plugin.kareylo/comments.comments',
-        'plugin.kareylo/comments.posts'
+    protected array $fixtures = [
+        'plugin.Kareylo/Comments.Users',
+        'plugin.Kareylo/Comments.Comments',
+        'plugin.Kareylo/Comments.Posts',
     ];
 
     /**
      * @var CommentsTable
      */
-    private $Comments;
+    private CommentsTable $Comments;
 
     /**
      * Start Test callback
      *
      * @return void
      */
-    public function setUp()
+    public function setUp(): void
     {
         Configure::delete('Comments');
         parent::setUp();
-        $this->Comments = TableRegistry::get('Kareylo/Comments.Comments');
+        $this->Comments = FactoryLocator::get('Table')->get('Kareylo/Comments.Comments');
     }
+
     /**
      * testCommentInstance
      *
      * @return void
      */
-    public function testCommentsInstance()
+    public function testCommentsInstance(): void
     {
         $this->assertInstanceOf('Kareylo\Comments\Model\Table\CommentsTable', $this->Comments);
     }

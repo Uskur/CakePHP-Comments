@@ -25,6 +25,11 @@
             "Kareylo\\Comments\\": "src"
         }
     },
+    "autoload-dev": {
+        "psr-4": {
+            "Kareylo\\Comments\\Test\\": "tests"
+        }
+    },
     "scripts": {
         "check": [
             "@test",
