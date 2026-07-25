@@ -89,15 +89,11 @@ class CommentsTable extends Table
      * Filter comments by privacy.
      *
      * @param \Cake\ORM\Query\SelectQuery $query Query instance.
-     * @param array $options Finder options.
+     * @param bool $private Whether to include private comments.
      * @return \Cake\ORM\Query\SelectQuery
      */
-    public function findByPrivacy(SelectQuery $query, array $options): SelectQuery
+    public function findByPrivacy(SelectQuery $query, bool $private = false): SelectQuery
     {
-        if (isset($options['private'])) {
-            return $query->where(['private' => $options['private']]);
-        }
-
-        return $query->where(['private' => false]);
+        return $query->where(['private' => $private]);
     }
 }

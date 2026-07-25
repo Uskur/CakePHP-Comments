@@ -57,18 +57,18 @@ class CommentableBehavior extends Behavior
      * Create the finder comments
      *
      * @param \Cake\ORM\Query\SelectQuery $query the current Query
-     * @param array $options Options
+     * @param bool $private Whether to include private comments.
      * @return \Cake\ORM\Query\SelectQuery
      */
-    public function findComments(SelectQuery $query, array $options = []): SelectQuery
+    public function findComments(SelectQuery $query, bool $private = false): SelectQuery
     {
         return $query->contain([
-            'Comments' => function (SelectQuery $q) use ($options) {
+            'Comments' => function (SelectQuery $q) use ($private) {
                 return $q
                     ->find('threaded')
                     ->contain(['CreatedBy.Attachments'])
                     ->orderBy(['Comments.created' => 'ASC'])
-                    ->find('byPrivacy', $options);
+                    ->find('byPrivacy', private: $private);
             },
         ]);
     }
