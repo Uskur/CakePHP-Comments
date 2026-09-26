@@ -5,9 +5,15 @@
             <?= __('On {0}, {1} wrote:', $comment->created->format('l, d M y H:i:s'), $comment->created_by->name ?? $comment->user->name ?? '') ?>
         </h5>
         <?= h($comment->content) ?>
-        <br><a href="#" class="reply" data-id="<?= h($comment->id) ?>">Reply</a>
+        <?php if ($connected && ($allowCommenting ?? true)) : ?>
+            <br><a href="#" class="reply" data-id="<?= h($comment->id) ?>"><?= __('Reply') ?></a>
+        <?php endif; ?>
         <?php if ($comment->has('children')) : ?>
-            <?= $this->element('Kareylo/Comments.display', ['comments' => $comment->children, 'connected' => $connected]) ?>
+            <?= $this->element('Kareylo/Comments.display', [
+                'comments' => $comment->children,
+                'connected' => $connected,
+                'allowCommenting' => $allowCommenting ?? true,
+            ]) ?>
         <?php endif; ?>
     </div>
 </div>

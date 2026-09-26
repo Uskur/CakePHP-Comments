@@ -43,9 +43,16 @@ class CommentHelper extends Helper
      *
      * @param \Cake\Datasource\EntityInterface|array $entity Contain all comments
      * @param bool $private Whether to include private comments.
+     * @param string|null $title Heading displayed above the comments. Defaults to "Comments".
+     * @param bool $allowCommenting Whether new comments and replies are allowed.
      * @return string
      */
-    public function display(EntityInterface|array $entity = [], bool $private = false): string
+    public function display(
+        EntityInterface|array $entity = [],
+        bool $private = false,
+        ?string $title = null,
+        bool $allowCommenting = true,
+    ): string
     {
         $comments = [];
         if ($entity instanceof EntityInterface && $entity->has('comments')) {
@@ -58,15 +65,40 @@ class CommentHelper extends Helper
             'comments' => $comments,
             'connected' => $this->_connected,
             'private' => $private,
+            'title' => $title ?? __('Comments'),
+            'commentCount' => $this->countComments($comments),
+            'allowCommenting' => $allowCommenting,
         ]);
 
         // Check if user is connected and add JS if needed
-        if ($entity instanceof EntityInterface) {
+        if ($entity instanceof EntityInterface && $allowCommenting) {
             $this->_html .= $this->form($entity, $private);
             $this->script();
         }
 
         return $this->_html;
+    }
+
+    /**
+     * Count every comment in a threaded comment tree.
+     *
+     * @param iterable $comments Threaded comments.
+     * @return int
+     */
+    private function countComments(iterable $comments): int
+    {
+        $count = 0;
+        foreach ($comments as $comment) {
+            $count++;
+            $children = $comment instanceof EntityInterface
+                ? $comment->get('children')
+                : ($comment['children'] ?? []);
+            if (is_iterable($children)) {
+                $count += $this->countComments($children);
+            }
+        }
+
+        return $count;
     }
 
     /**
