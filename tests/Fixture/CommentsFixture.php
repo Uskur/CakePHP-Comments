@@ -8,25 +8,6 @@ use Cake\TestSuite\Fixture\TestFixture;
 class CommentsFixture extends TestFixture
 {
     /**
-     * fields property
-     *
-     * @var array
-     * @access public
-     */
-    public array $fields = [
-        'id' => ['type' => 'integer'],
-        'content' => ['type' => 'text', 'null' => false],
-        'ref' => ['type' => 'text', 'null' => false, 'length' => 255],
-        'ref_id' => ['type' => 'integer', 'null' => false, 'length' => 11],
-        'ip' => ['type' => 'string', 'null' => false, 'length' => 255],
-        'parent_id' => ['type' => 'integer', 'null' => true, 'length' => 11],
-        'user_id' => ['type' => 'integer', 'null' => false, 'length' => 11],
-        'created' => ['type' => 'datetime', 'null' => true, 'default' => null],
-        'modified' => ['type' => 'datetime', 'null' => true, 'default' => null],
-        '_constraints' => ['primary' => ['type' => 'primary', 'columns' => ['id']]],
-    ];
-
-    /**
      * records property
      *
      * @var array

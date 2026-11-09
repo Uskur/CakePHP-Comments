@@ -6,6 +6,7 @@ use Cake\Core\Configure;
 use Cake\Datasource\ConnectionManager;
 use Cake\Datasource\FactoryLocator;
 use Cake\ORM\Locator\TableLocator;
+use Cake\TestSuite\Fixture\SchemaLoader;
 
 $pluginRoot = dirname(__DIR__);
 $autoload = $pluginRoot . '/vendor/autoload.php';
@@ -40,9 +41,10 @@ foreach ([TMP, LOGS, CACHE, CACHE . 'models' . DS, CACHE . 'persistent' . DS, CA
 }
 
 require dirname($autoload) . '/cakephp/cakephp/config/bootstrap.php';
+require dirname($autoload) . '/cakephp/cakephp/src/I18n/functions_global.php';
 
 Configure::write('App', [
-    'namespace' => 'App',
+    'namespace' => 'CommentsTestApp',
     'encoding' => 'UTF-8',
     'defaultLocale' => 'en_US',
     'defaultTimezone' => 'UTC',
@@ -79,3 +81,5 @@ ConnectionManager::setConfig('test', [
 ]);
 
 FactoryLocator::add('Table', new TableLocator());
+
+(new SchemaLoader())->loadInternalFile(__DIR__ . '/schema.php');

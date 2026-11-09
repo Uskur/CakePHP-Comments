@@ -8,20 +8,6 @@ use Cake\TestSuite\Fixture\TestFixture;
 class ArticlesFixture extends TestFixture
 {
     /**
-     * fields property
-     *
-     * @var array
-     * @access public
-     */
-    public array $fields = [
-        'id' => ['type' => 'integer'],
-        'title' => ['type' => 'string', 'null' => false],
-        'content' => ['type' => 'text', 'null' => false],
-        'user_id' => ['type' => 'integer', 'null' => false, 'length' => 11],
-        '_constraints' => ['primary' => ['type' => 'primary', 'columns' => ['id']]],
-    ];
-
-    /**
      * records property
      *
      * @var array

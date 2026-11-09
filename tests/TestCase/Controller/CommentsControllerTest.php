@@ -96,7 +96,9 @@ class CommentsControllerTest extends TestCase
         $this->request = $this->request->withParsedBody($data);
         $this->model = FactoryLocator::get('Table')->get($data['ref']);
         if ($data['ref'] !== 'Posts' || $removeBehavior) {
-            $this->model->behaviors()->unload('Commentable');
+            if ($this->model->hasBehavior('Commentable')) {
+                $this->model->behaviors()->unload('Commentable');
+            }
         } else {
             $this->model->addBehavior('Kareylo/Comments.Commentable');
         }

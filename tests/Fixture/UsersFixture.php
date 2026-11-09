@@ -8,20 +8,6 @@ use Cake\TestSuite\Fixture\TestFixture;
 class UsersFixture extends TestFixture
 {
     /**
-     * Fields
-     *
-     * @var array $fields
-     * @access public
-     */
-    public array $fields = [
-        'id' => ['type' => 'integer'],
-        'username' => ['type' => 'string', 'null' => false],
-        'passwd' => ['type' => 'string', 'null' => true, 'default' => null, 'length' => 128],
-        'created' => ['type' => 'datetime', 'null' => true, 'default' => null],
-        'modified' => ['type' => 'datetime', 'null' => true, 'default' => null],
-        '_constraints' => ['primary' => ['type' => 'primary', 'columns' => ['id']]],
-    ];
-    /**
      * Records
      *
      * @var array $records
